@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Mahadev Fitness Club</title>
+  <style>
+    body { font-family: Arial; padding: 20px; }
+    input, button { margin: 5px 0; padding: 8px; width: 300px; }
+    table { margin-top: 20px; width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
+  </style>
+</head>
+<body>
+  <h2>Mahadev Fitness Club - Member Entry</h2>
+  <form id="memberForm">
+    <input type="text" id="name" placeholder="Boy's Name" required><br>
+    <input type="text" id="fatherName" placeholder="Father's Name" required><br>
+    <input type="tel" id="mobile" placeholder="Mobile Number" required><br>
+    <input type="date" id="startDate" required><br>
+    <input type="date" id="endDate" required><br>
+    <input type="number" id="fees" placeholder="Fees (₹)" required><br>
+    <button type="submit">Add Member</button>
+  </form>
+
+  <h3>All Members</h3>
+  <table id="membersTable">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Mobile</th>
+        <th>Start</th>
+        <th>End</th>
+        <th>Fees</th>
+        <th>Status</th>
+        <th>Send SMS</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    const form = document.getElementById('memberForm');
+    const tableBody = document.querySelector('#membersTable tbody');
+
+    function loadMembers() {
+      tableBody.innerHTML = '';
+      const members = JSON.parse(localStorage.getItem('members')) || [];
+
+      const today = new Date();
+
+      members.forEach(member => {
+        const endDate = new Date(member.endDate);
+        const expired = endDate < today;
+
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${member.name}</td>
+          <td>${member.mobile}</td>
+          <td>${member.startDate}</td>
+          <td>${member.endDate}</td>
+          <td>₹${member.fees}</td>
+          <td style="color:${expired ? 'red' : 'green'}">${expired ? 'Expired' : 'Active'}</td>
+          <td><a href="sms:${member.mobile}?body=Hello ${member.name}, your gym fee is ${expired ? 'expired. Please renew' : 'active.'}" target="_blank">Send SMS</a></td>
+        `;
+        tableBody.appendChild(row);
+      });
+    }
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      const member = {
+        name: document.getElementById('name').value,
+        fatherName: document.getElementById('fatherName').value,
+        mobile: document.getElementById('mobile').value,
+        startDate: document.getElementById('startDate').value,
+        endDate: document.getElementById('endDate').value,
+        fees: document.getElementById('fees').value
+      };
+
+      const members = JSON.parse(localStorage.getItem('members')) || [];
+      members.push(member);
+      localStorage.setItem('members', JSON.stringify(members));
+
+      alert("Member added!");
+      form.reset();
+      loadMembers();
+    });
+
+    // Initial Load
+    loadMembers();
+  </script>
+</body>
+</html>
